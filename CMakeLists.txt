@@ -23,5 +23,10 @@ target_link_libraries(${PROJECT_NAME}
         )
 
 cs_install()
-cs_export()
 
+## Mark other files for installation (e.g. launch and bag files, etc.)
+install(DIRECTORY config
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  )
+
+cs_export()
