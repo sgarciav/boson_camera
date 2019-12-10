@@ -71,8 +71,11 @@ void BosonCamera::init() {
 
     // Set video format
     format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-//    format.fmt.pix.pixelformat = V4L2_PIX_FMT_YVU420;    // 8-bit
-    format.fmt.pix.pixelformat = V4L2_PIX_FMT_Y16;       // 16-bit
+    if (1) {
+        format.fmt.pix.pixelformat = V4L2_PIX_FMT_YVU420;    // 8-bit
+    } else {
+        format.fmt.pix.pixelformat = V4L2_PIX_FMT_Y16;       // 16-bit
+    }
     format.fmt.pix.width = 640;
     format.fmt.pix.height = 512;
 
@@ -111,6 +114,10 @@ void BosonCamera::allocateBuffer() {
     // Initialize buffer
     printf("Image width   = %i\n", format.fmt.pix.width);
     printf("Image height  = %i\n", format.fmt.pix.height);
+    if (format.fmt.pix.pixelformat == V4L2_PIX_FMT_Y16)
+        printf("Image depth = 16\n");
+    else
+        printf("Image depth = 8\n");
     printf("Buffer length = %i\n", buffertype.length);
 
     void *buffer_start = mmap(NULL, buffertype.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, buffertype.m.offset);
@@ -123,8 +130,13 @@ void BosonCamera::allocateBuffer() {
     buffer = buffertype;
 
     // Declare openCV Buffer address
-    cv::Mat raw_input_16(format.fmt.pix.height, format.fmt.pix.width, CV_16U, buffer_start);
-    raw_input = raw_input_16;
+    if (format.fmt.pix.pixelformat == V4L2_PIX_FMT_Y16) {      // 16-bit
+    	cv::Mat raw_input_16(format.fmt.pix.height, format.fmt.pix.width, CV_16U, buffer_start);
+    	raw_input = raw_input_16;
+    } else {
+    	cv::Mat raw_input_8(format.fmt.pix.height, format.fmt.pix.width, CV_8U, buffer_start);
+    	raw_input = raw_input_8;
+    }
 }
 
 cv::Mat BosonCamera::captureRawFrame() {

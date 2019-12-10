@@ -90,7 +90,12 @@ int main(int argc, char *argv[]) {
 
         // Convert to image_msg & publish msg
         sensor_msgs::ImagePtr msg;
-        msg = cv_bridge::CvImage(std_msgs::Header(), "mono16", img).toImageMsg();
+        if (img.depth() == CV_16U) {
+            msg = cv_bridge::CvImage(std_msgs::Header(), "mono16", img).toImageMsg();
+        } else {
+            msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", img).toImageMsg();
+        }
+            
 		    // Build timestamp
 		    ros::Time last_ts(0, 0);
 		    last_ts.sec = camera.last_ts.tv_sec;
